@@ -21,7 +21,25 @@ class Findlocation_Install {
 	 */
 	public function run_install()
 	{
-		//nothing to do right now
+		// Create the database tables.
+		// Also include table_prefix in name
+		$this->db->query('CREATE TABLE IF NOT EXISTS `'.Kohana::config('database.default.table_prefix').'findlocation_settings` (
+				  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+				  `region_code` varchar(10) DEFAULT NULL,
+				  `append_to_google` varchar(255) DEFAULT NULL,
+				  `geonames_username` varchar(255) DEFAULT NULL,
+				  PRIMARY KEY (`id`)
+				) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1');
+				
+		$this->db->query('CREATE TABLE IF NOT EXISTS `'.Kohana::config('database.default.table_prefix').'findlocation_cache` (
+				  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+				  `search_term` varchar(255) DEFAULT NULL,
+				  `result_name` varchar(255) DEFAULT NULL,
+				  `lat` double NOT NULL default \'0\',
+				  `lon` double NOT NULL default \'0\',
+				  PRIMARY KEY (`id`)
+				) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1');
+				
 	}
 
 	/**
@@ -29,7 +47,7 @@ class Findlocation_Install {
 	 */
 	public function uninstall()
 	{
-		// I worry that someone will upload lots of files, and then uninstall this not realizing that they've just destroyed all the meta
-		// data associated with thier files, so right now uninstalling this doesn't do anything.
+		$this->db->query('DROP TABLE `'.Kohana::config('database.default.table_prefix').'findlocation_settings`');
+		$this->db->query('DROP TABLE `'.Kohana::config('database.default.table_prefix').'findlocation_cache`');
 	}
 }
