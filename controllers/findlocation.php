@@ -28,12 +28,19 @@ class Findlocation_Controller extends Controller
 		if (isset($_GET['address']) AND ! empty($_GET['address']))
 		{
 
-			$address = $_GET['address'];
+			$address = strtoupper($_GET['address']);
 			
 			//check if this is already in the cache
 			$geocode = $this->check_cache($address);
 			if(count($geocode) > 0)
 			{
+				if($geocode[0]['name'] == null)
+				{
+					echo "<strong>Sorry No Results for $address</strong>";
+					return;
+				}
+				
+				//check if null
 				$view = View::factory('findlocation/location_results');
 				$view->places = $geocode;
 				$view->render(TRUE);
@@ -48,10 +55,12 @@ class Findlocation_Controller extends Controller
 			
 			$geocode = $this->check_bounding_box($geocode, $settings);
 			
+			//put the findings in the cache
+			$this->put_in_cache($address, $geocode);
+			
 			if (count($geocode) > 0)
 			{
-				//put the findings in the cache
-				$this->put_in_cache($address, $geocode);
+				
 				
 				$view = View::factory('findlocation/location_results');
 				$view->places = $geocode;
@@ -75,6 +84,16 @@ class Findlocation_Controller extends Controller
 	*****************************/
 	private function put_in_cache($address, $geocode)
 	{
+		if( count($geocode) == 0)
+		{
+			$cache = ORM::factory('findlocation_cache');
+			$cache->search_term = $address;
+			$cache->result_name = null;
+			$cache->lat = null;
+			$cache->lon = null;
+			$cache->save();
+		}
+		
 		foreach($geocode as $item)
 		{
 			$cache = ORM::factory('findlocation_cache');
@@ -222,7 +241,7 @@ class Findlocation_Controller extends Controller
 			{
 				$region_str = "&region=".$settings->region_code;
 			}
-			$append_str = rawurlencode($settings->append_to_google);
+			$append_str = rawurlencode(strtoupper($settings->append_to_google));
 		}
 		
 		
