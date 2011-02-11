@@ -22,19 +22,37 @@ class Findlocation_Controller extends Controller
 	{
 		$this->template = "";
 		$this->auto_render = FALSE;
+		
+		$settings = ORM::factory('findlocation_settings')->where('id', 1)->find();
 
 		if (isset($_GET['address']) AND ! empty($_GET['address']))
 		{
-			$geocode = map::geocode($_GET['address']);
+
 			$address = $_GET['address'];
 			
-			$google_geocode = $this->google_geocode($address);
-			$geonames_geocode = $this->geonames_geocode($address);
+			//check if this is already in the cache
+			$geocode = $this->check_cache($address);
+			if(count($geocode) > 0)
+			{
+				$view = View::factory('findlocation/location_results');
+				$view->places = $geocode;
+				$view->render(TRUE);
+				return;
+			}
+			
+			//it wasn't in the cache so go find it
+			$google_geocode = $this->google_geocode($address, $settings);
+			$geonames_geocode = $this->geonames_geocode($address, $settings);
 			
 			$geocode = $this->merge_results($google_geocode, $geonames_geocode);
 			
+			$geocode = $this->check_bounding_box($geocode, $settings);
+			
 			if (count($geocode) > 0)
 			{
+				//put the findings in the cache
+				$this->put_in_cache($address, $geocode);
+				
 				$view = View::factory('findlocation/location_results');
 				$view->places = $geocode;
 				$view->render(TRUE);
@@ -46,9 +64,103 @@ class Findlocation_Controller extends Controller
 		}
 		else
 		{
-			echo "<strong>Sorry No Results for $address</strong>";
+			echo "<strong>Please specify a location</strong>";
 		}
 	}//end of geocode
+	
+	
+	/****************************
+	* Puts the findings of the geocode
+	* into the cache
+	*****************************/
+	private function put_in_cache($address, $geocode)
+	{
+		foreach($geocode as $item)
+		{
+			$cache = ORM::factory('findlocation_cache');
+			$cache->search_term = $address;
+			$cache->result_name = $item['name'];
+			$cache->lat = $item['lat'];
+			$cache->lon = $item['lon'];
+			$cache->save();
+		}
+	}
+	
+	
+	/*****************************
+	* Checks to see if the given address
+	* has already been geolocated
+	* if so returns the locations, otherwise returns an empty array
+	*******************************/
+	private function check_cache($address)
+	{
+		$retval = array();
+		
+		$cache = ORM::factory('findlocation_cache')
+			->where('search_term', $address)
+			->find_all();			
+		foreach($cache as $item)
+		{
+			$retval[] = array("name"=>$item->result_name, "lat"=>$item->lat, "lon"=>$item->lon);
+		}
+		
+		return $retval;
+			
+	}
+	
+	private function check_bounding_box($results, $settings)
+	{
+		//makie sure the bounding box is specified
+		if($settings->loaded)
+		{
+			if($settings->n_w_lat == 0 && 
+				$settings->n_w_lon == 0 &&
+				$settings->s_e_lat == 0 &&
+				$settings->s_e_lon == 0)
+			{
+				return $results;
+			}
+		}
+		else
+		{
+			return $results;
+		}
+	
+		//first check and see if the bounding box is even specified
+		
+		$retval = array();
+		foreach($results as $result)
+		{
+			
+			//figure out if we're crossing the int date line
+			$dateline = false;
+			if($settings->n_w_lon > $settings->s_e_lon)
+			{ //crossing the int date line
+				$dateline = true;
+			}
+			
+			//first test the lat
+			if ($result['lat']  <= $settings->n_w_lat && $result['lat'] >= $settings->s_e_lat)
+			{
+			}
+			else //it isn't inside the bounds
+			{
+				continue;
+			}
+			//next test the lon
+			if ( ((!$dateline) && ($result['lon']  >= $settings->n_w_lon) && ($result['lon'] <= $settings->s_e_lon)) || 
+				($dateline) && ((($result['lon'] >= $settings->n_w_lon) && ($result['lon'] <= 180)) ||  (($result['lon'] <= $settings->s_e_lon) && ($result['lon'] >= -180))) )
+			{
+				$retval[] = $result;
+			}
+			else //it isn't inside the bounds
+			{
+				continue;
+			}
+		}
+		
+		return $retval;
+	}
 	
 	
 	private function merge_results($google, $geonames)
@@ -98,12 +210,12 @@ class Findlocation_Controller extends Controller
 	
 	
 	//does all the geocoding work
-	private function google_geocode($address) 
+	private function google_geocode($address, $settings) 
 	{
 		//get the region stuff from the database
 		$region_str = "";
 		$append_str = "";
-		$settings = ORM::factory('findlocation_settings')->where('id', 1)->find();
+		
 		if($settings->loaded)
 		{
 			if($settings->region_code != "")
@@ -152,13 +264,12 @@ class Findlocation_Controller extends Controller
 	
 	
 		//does all the geocoding work
-	private function geonames_geocode($address) 
+	private function geonames_geocode($address, $settings) 
 	{
 		//get the region stuff from the database
 		$region_str = "";
 		$append_str = "";
 		$username = "";
-		$settings = ORM::factory('findlocation_settings')->where('id', 1)->find();
 		if($settings->loaded)
 		{
 			if($settings->region_code != "")

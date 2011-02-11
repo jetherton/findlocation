@@ -62,6 +62,21 @@
 		</h4>
 		<?php print form::input('geonames_username', $form['geonames_username'], ' class="text"'); ?>
 	</div>
+	<br/>
+	<div class="row">
+		<h4>Bounding box
+			<span><br/>Use this to set the geographic area that search results should come from. Put 0 for all the values if you want
+				the searching algorithms to search the whole planent. Specify the North West and South East corners of the bounding box. 
+				Note that the bounding box will loose it's square shape as you approach the poles.
+			</span>
+		</h4>
+		North West Latitude: <?php print form::input('n_w_lat', $form['n_w_lat'], ' class="text" style="float:none;" '); ?> 
+		North West Longitude: <?php print form::input('n_w_lon', $form['n_w_lon'], ' class="text" style="float:none;" '); ?> 
+	</div>	
+	<div class="row">
+		South East Latitude: <?php print form::input('s_e_lat', $form['s_e_lat'], ' class="text" style="float:none;" '); ?> 
+		South East Longitude: <?php print form::input('s_e_lon', $form['s_e_lon'], ' class="text" style="float:none;" '); ?> 
+	</div>
 	
 	<br/>
 	<div class="row">

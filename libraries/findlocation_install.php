@@ -28,6 +28,10 @@ class Findlocation_Install {
 				  `region_code` varchar(10) DEFAULT NULL,
 				  `append_to_google` varchar(255) DEFAULT NULL,
 				  `geonames_username` varchar(255) DEFAULT NULL,
+				  `n_w_lat` double NOT NULL default \'0\',
+				  `n_w_lon` double NOT NULL default \'0\',
+				  `s_e_lat` double NOT NULL default \'0\',
+				  `s_e_lon` double NOT NULL default \'0\',
 				  PRIMARY KEY (`id`)
 				) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1');
 				
