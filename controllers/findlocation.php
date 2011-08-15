@@ -20,6 +20,7 @@ class Findlocation_Controller extends Controller
 	//does the geocoding
 	public function geocode()
 	{
+		$this->header = '<br/><h4>'.Kohana::lang("ui_main.search_results").':</h4>';
 		$this->template = "";
 		$this->auto_render = FALSE;
 		
@@ -36,7 +37,7 @@ class Findlocation_Controller extends Controller
 			{
 				if($geocode[0]['name'] == null)
 				{
-					echo "<strong>Sorry No Results for $address</strong>";
+					echo $this->header."<strong>Sorry No Results for $address</strong>";
 					return;
 				}
 				
@@ -68,12 +69,12 @@ class Findlocation_Controller extends Controller
 			}
 			else
 			{
-				echo "<strong>Sorry No Results for $address</strong>";
+				echo $this->header."<strong>Sorry No Results for $address</strong>";
 			}
 		}
 		else
 		{
-			echo "<strong>Please specify a location</strong>";
+			echo $this->header."<strong>Please specify a location</strong>";
 		}
 	}//end of geocode
 	

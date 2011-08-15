@@ -26,7 +26,25 @@ class findlocation {
 	 */
 	public function add()
 	{
-		//no hooks
+		//check to see when the user is requesting reports/submit or admin/reports/edit
+		if (Router::$controller == 'reports')
+		{
+			switch (Router::$method)
+	        {
+	        	case 'edit':
+	        		Event::add('ushahidi_action.report_form_admin', array($this, '_add_urls'));
+	        	case 'submit':
+	        		Event::add('ushahidi_action.report_form', array($this, '_add_urls'));	        			        		
+	        		plugin::add_javascript("findlocation/js/redo_find_location");
+	        	break;    	
+	        }
+		}
+	}
+	
+	public function _add_urls()
+	{
+		echo '<span id="base_url" style="display:none;">'.url::base().'</span>';
+		echo '<span id="default_zoom" style="display:none;">'.Kohana::config('settings.default_zoom').'</span>';
 	}
 	
 }

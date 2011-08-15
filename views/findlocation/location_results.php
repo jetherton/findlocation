@@ -1,3 +1,4 @@
+<br/><h4><?php echo Kohana::lang("ui_main.search_results"); ?>:</h4>
 <ul>
 <?php foreach($places as $place) { ?>
 
