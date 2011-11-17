@@ -33,6 +33,7 @@ class findlocation {
 	        {
 	        	case 'edit':
 	        		Event::add('ushahidi_action.report_form_admin', array($this, '_add_urls'));
+	        		plugin::add_javascript("findlocation/js/redo_find_location");
 	        	case 'submit':
 	        		Event::add('ushahidi_action.report_form', array($this, '_add_urls'));	        			        		
 	        		plugin::add_javascript("findlocation/js/redo_find_location");
