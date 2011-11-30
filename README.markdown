@@ -3,14 +3,14 @@ Find Location - Ushahidi Plugin
 
 About
 -----------
-name: Find Location
-website: https://github.com/jetherton/findlocation
-description: Improves the functionality of the "Find Location" Button.
-version: 1.0
-requires: 2.1
-tested up to: 2.1
-author: John Etherton
-author website: http://johnetherton.com
+* name: Find Location
+* website: https://github.com/jetherton/findlocation
+* description: Improves the functionality of the "Find Location" Button.
+* version: 1.0
+* requires: 2.1
+* tested up to: 2.1
+* author: John Etherton
+* author website: http://johnetherton.com
 
 Description
 -----------------
