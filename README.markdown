@@ -1,4 +1,8 @@
-=== About ===
+Find Location - Ushahidi Plugin
+==================
+
+About
+-----------
 name: Find Location
 website: https://github.com/jetherton/findlocation
 description: Improves the functionality of the "Find Location" Button.
@@ -8,7 +12,8 @@ tested up to: 2.1
 author: John Etherton
 author website: http://johnetherton.com
 
-== Description ==
+Description
+-----------------
 Improves the functionality of the "Find Location" Button. This plugin will replace the functionality of the reports/geocode controller.
 
 * Lets you set the region/country results are biased towards
