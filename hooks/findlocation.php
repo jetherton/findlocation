@@ -30,22 +30,40 @@ class findlocation {
 		if (Router::$controller == 'reports')
 		{
 			switch (Router::$method)
-	        {
-	        	case 'edit':
-	        		Event::add('ushahidi_action.report_form_admin', array($this, '_add_urls'));
-	        		plugin::add_javascript("findlocation/js/redo_find_location");
-	        	case 'submit':
-	        		Event::add('ushahidi_action.report_form', array($this, '_add_urls'));	        			        		
-	        		plugin::add_javascript("findlocation/js/redo_find_location");
-	        	break;    	
-	        }
+			{
+				case 'edit':
+					Event::add('ushahidi_action.report_form_admin', array($this, '_add_urls'));
+					plugin::add_javascript("findlocation/js/redo_find_location");
+				case 'submit':
+					Event::add('ushahidi_action.report_form', array($this, '_add_urls'));	        			        		
+					plugin::add_javascript("findlocation/js/redo_find_location");
+				break;    	
+			}			
 		}
+		if (Router::$controller == 'geolocation_task')
+		{
+			Event::add('ushahidi_action.report_form_admin', array($this, '_add_urls'));
+			Event::add('ushahidi_action.header_scripts', array($this, '_add_ts_css'));
+			plugin::add_javascript("findlocation/js/redo_find_location");
+		}
+	
 	}
 	
 	public function _add_urls()
 	{
 		echo '<span id="base_url" style="display:none;">'.url::base().'</span>';
 		echo '<span id="default_zoom" style="display:none;">'.Kohana::config('settings.default_zoom').'</span>';
+	}
+	
+	public function _add_urls_and_css()
+	{
+		echo '<span id="base_url" style="display:none;">'.url::base().'</span>';
+		echo '<span id="default_zoom" style="display:none;">'.Kohana::config('settings.default_zoom').'</span>';
+		echo '<style type="text/css">#find_location_results{padding-left;20px;}</style>';
+	}
+	public function _add_ts_css()
+	{
+		echo '<style type="text/css">#find_location_results ul{padding-left:20px;}</style>';
 	}
 	
 }
