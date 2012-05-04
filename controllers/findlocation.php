@@ -314,6 +314,11 @@ class Findlocation_Controller extends Controller
 		if($_result = $this->fetchURL($_url)) 
 		{
 			$_result_parts = json_decode($_result);
+			if($_result_parts->status->message == 'user does not exist.')
+			{
+				return array();
+			}
+			
 			
 			$results_count = intval($_result_parts->totalResultsCount);
 			if( $results_count = 0)
