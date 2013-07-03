@@ -36,7 +36,8 @@ class Findlocation_settings_Controller extends Admin_Controller
 			'n_w_lat' => "",
 			'n_w_lon' => "",
 			's_e_lat' => "",
-			's_e_lon' => ""
+			's_e_lon' => "",
+			'fuzzy' => false,  // HT: Added default for fuzzy search
 		);
 		
 		$errors = $form;
@@ -78,6 +79,10 @@ class Findlocation_settings_Controller extends Admin_Controller
 				$settings->n_w_lon = $post->n_w_lon;
 				$settings->s_e_lat = $post->s_e_lat;
 				$settings->s_e_lon = $post->s_e_lon;
+				// HT: Added for fuzzy search
+				if(isset($_POST['fuzzy'])) {
+					$settings->fuzzy = 1;
+				}
 				$settings->save();
 				$form_saved = TRUE;
 				$form = arr::overwrite($form, $post->as_array());
@@ -125,6 +130,7 @@ class Findlocation_settings_Controller extends Admin_Controller
 				$form['n_w_lon'] = $settings->n_w_lon;
 				$form['s_e_lat'] = $settings->s_e_lat;
 				$form['s_e_lon'] = $settings->s_e_lon;
+				$form['fuzzy'] = $settings->fuzzy; // HT: Added for fuzzy search
 			}
 		}//end of not being posted
 		

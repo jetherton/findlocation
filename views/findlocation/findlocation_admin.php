@@ -37,13 +37,13 @@
 <div class="report-form">
 	<div class="row">
 		
-		<h4>Country code of the country to bound searches to? 
-			<span><br/>For example United States = 'US'. For a complete list of country codes see 
+		<h4>Country code of the country to bound searches to?
+			<span><br/>For example United States = 'US'. For a complete list of country codes see
 				<a href="http://en.wikipedia.org/wiki/CcTLD">here</a>
 				. Leave blank to search all countries.
 			</span>
 		</h4>
-		<?php print form::input('region_code', $form['region_code'], ' class="text"'); ?>		
+		<?php print form::input('region_code', $form['region_code'], ' class="text"'); ?>
 	</div>
 	<br/>
 	<div class="row">
@@ -56,26 +56,35 @@
 	<br/>
 	<div class="row">
 		<h4>GeoNames Username
-			<span><br/>The username this site uses to query GeoNames. You can sign up for a GeoNames username 
+			<span><br/>The username this site uses to query GeoNames. You can sign up for a GeoNames username
 				<a href="http://www.geonames.org/login">here</a>
 			</span>
 		</h4>
 		<?php print form::input('geonames_username', $form['geonames_username'], ' class="text"'); ?>
 	</div>
 	<br/>
+	<!-- HT: Added code for fuzzy search enable/disable -->
+	<div class="row">
+		<h4>Fuzzy Search
+			<span><br/>Enabling fuzzy search will make result filter by similar GeoNames (not require to put adjact GeoName).</span>
+		</h4>
+		<?php print form::checkbox('fuzzy', 'fuzzy', $form['fuzzy']); ?>
+	</div>
+	<br/>
+	<!-- HT: End of code for fuzzy search enable/disable -->
 	<div class="row">
 		<h4>Bounding box
 			<span><br/>Use this to set the geographic area that search results should come from. Put 0 for all the values if you want
-				the searching algorithms to search the whole planent. Specify the North West and South East corners of the bounding box. 
+				the searching algorithms to search the whole planent. Specify the North West and South East corners of the bounding box.
 				Note that the bounding box will loose it's square shape as you approach the poles.
 			</span>
 		</h4>
-		North West Latitude: <?php print form::input('n_w_lat', $form['n_w_lat'], ' class="text" style="float:none;" '); ?> 
-		North West Longitude: <?php print form::input('n_w_lon', $form['n_w_lon'], ' class="text" style="float:none;" '); ?> 
-	</div>	
+		North West Latitude: <?php print form::input('n_w_lat', $form['n_w_lat'], ' class="text" style="float:none;" '); ?>
+		North West Longitude: <?php print form::input('n_w_lon', $form['n_w_lon'], ' class="text" style="float:none;" '); ?>
+	</div>
 	<div class="row">
-		South East Latitude: <?php print form::input('s_e_lat', $form['s_e_lat'], ' class="text" style="float:none;" '); ?> 
-		South East Longitude: <?php print form::input('s_e_lon', $form['s_e_lon'], ' class="text" style="float:none;" '); ?> 
+		South East Latitude: <?php print form::input('s_e_lat', $form['s_e_lat'], ' class="text" style="float:none;" '); ?>
+		South East Longitude: <?php print form::input('s_e_lon', $form['s_e_lon'], ' class="text" style="float:none;" '); ?>
 	</div>
 	
 	<br/>
