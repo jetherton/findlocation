@@ -9,6 +9,7 @@
 class Findlocation_Controller extends Controller
 {
 	
+	var $status_message = ''; // HT: variable for status of request
 	
 	public function index()
 	{
@@ -20,6 +21,7 @@ class Findlocation_Controller extends Controller
 	//does the geocoding
 	public function geocode()
 	{
+		$this->status_message = ""; // HT: Reset status message on each request
 		$this->header = '<br/><h4>'.Kohana::lang("ui_main.search_results").':</h4>';
 		$this->template = "";
 		$this->auto_render = FALSE;
@@ -69,7 +71,14 @@ class Findlocation_Controller extends Controller
 			}
 			else
 			{
-				echo $this->header."<strong>Sorry No Results for $address</strong>";
+				// HT: Updated the message when no result or error
+				// echo $this->header."<strong>Sorry No Results for $address</strong>";
+				echo $this->header;
+				if($this->status_message != "")
+				{
+					echo "<strong>".$this->status_message."</strong><br/><br/>";
+				}
+				echo "<strong>Sorry No Results for $address</strong>";
 			}
 		}
 		else
@@ -118,7 +127,7 @@ class Findlocation_Controller extends Controller
 		
 		$cache = ORM::factory('findlocation_cache')
 			->where('search_term', $address)
-			->find_all();			
+			->find_all();
 		foreach($cache as $item)
 		{
 			$retval[] = array("name"=>$item->result_name, "lat"=>$item->lat, "lon"=>$item->lon);
@@ -133,7 +142,7 @@ class Findlocation_Controller extends Controller
 		//makie sure the bounding box is specified
 		if($settings->loaded)
 		{
-			if($settings->n_w_lat == 0 && 
+			if($settings->n_w_lat == 0 &&
 				$settings->n_w_lon == 0 &&
 				$settings->s_e_lat == 0 &&
 				$settings->s_e_lon == 0)
@@ -168,7 +177,7 @@ class Findlocation_Controller extends Controller
 				continue;
 			}
 			//next test the lon
-			if ( ((!$dateline) && ($result['lon']  >= $settings->n_w_lon) && ($result['lon'] <= $settings->s_e_lon)) || 
+			if ( ((!$dateline) && ($result['lon']  >= $settings->n_w_lon) && ($result['lon'] <= $settings->s_e_lon)) ||
 				($dateline) && ((($result['lon'] >= $settings->n_w_lon) && ($result['lon'] <= 180)) ||  (($result['lon'] <= $settings->s_e_lon) && ($result['lon'] >= -180))) )
 			{
 				$retval[] = $result;
@@ -212,25 +221,25 @@ class Findlocation_Controller extends Controller
 	
 	
 	//$distance between two points in meters
-	private function getDistance($latitude1, $longitude1, $latitude2, $longitude2) 
-	{  
-		$earth_radius = 6371;  
+	private function getDistance($latitude1, $longitude1, $latitude2, $longitude2)
+	{
+		$earth_radius = 6371;
 
-		$dLat = deg2rad($latitude2 - $latitude1);  
-		$dLon = deg2rad($longitude2 - $longitude1);  
+		$dLat = deg2rad($latitude2 - $latitude1);
+		$dLon = deg2rad($longitude2 - $longitude1);
 
-		$a = sin($dLat/2) * sin($dLat/2) + cos(deg2rad($latitude1)) * cos(deg2rad($latitude2)) * sin($dLon/2) * sin($dLon/2);  
-		$c = 2 * asin(sqrt($a));  
-		$d = $earth_radius * $c;  
+		$a = sin($dLat/2) * sin($dLat/2) + cos(deg2rad($latitude1)) * cos(deg2rad($latitude2)) * sin($dLon/2) * sin($dLon/2);
+		$c = 2 * asin(sqrt($a));
+		$d = $earth_radius * $c;
 
-		return $d;  
-	}  
+		return $d;
+	}
 	
 	
 	
 	
 	//does all the geocoding work
-	private function google_geocode($address, $settings) 
+	private function google_geocode($address, $settings)
 	{
 		//get the region stuff from the database
 		$region_str = "";
@@ -250,7 +259,7 @@ class Findlocation_Controller extends Controller
 		$_url = "http://maps.googleapis.com/maps/api/geocode/json?address=".$address.$append_str."&sensor=false".$region_str;
         
 		$_result = false;
-		if($_result = $this->fetchURL($_url)) 
+		if($_result = $this->fetchURL($_url))
 		{
 			$_result_parts = json_decode($_result);
 			if($_result_parts->status!="OK")
@@ -278,15 +287,16 @@ class Findlocation_Controller extends Controller
 			}
 		}
 			 
-		return $ret_val;      
+		return $ret_val;
 	}//end of get google coordinates
 	
 	
 	
 		//does all the geocoding work
-	private function geonames_geocode($address, $settings) 
+	private function geonames_geocode($address, $settings)
 	{
 		//get the region stuff from the database
+		$fuzzy_str = ""; // HT: Added for fuzzy search
 		$region_str = "";
 		$append_str = "";
 		$username = "";
@@ -296,6 +306,12 @@ class Findlocation_Controller extends Controller
 			{
 				$region_str = "&country=".$settings->region_code;
 			}
+			// HT: If condition added for fuzzy search
+			if($settings->fuzzy)
+			{
+				$fuzzy_str = "&fuzzy=0.6";
+			}
+			// HT: End of code If condition added for fuzzy search
 			$append_str = rawurlencode($settings->append_to_google);
 			$username = $settings->geonames_username;
 		}
@@ -307,20 +323,22 @@ class Findlocation_Controller extends Controller
 		
 		$address = rawurlencode($address);
 		$_url = "http://api.geonames.org/searchJSON?q=".$address.$append_str."&username=".$username.$region_str;
-        
+		$_url .= $fuzzy_str; // HT: Fuzzy url string added for fuzzy search
 		$ret_val = array();
 		
 		$_result = false;
-		if($_result = $this->fetchURL($_url)) 
+		if($_result = $this->fetchURL($_url))
 		{
 			$_result_parts = json_decode($_result);
 			
 			if(isset($_result_parts->status))
 			{
-				if($_result_parts->status->message == 'user does not exist.')
-				{
-					return array();
-				}
+					if($_result_parts->status->message != '') // HT: Added to check the status messages
+					//if($_result_parts->status->message == 'user does not exist.') // HT: removed as was checking only one status
+					{
+						$this->status_message = $_result_parts->status->message; // HT: Status Message set to be displayed
+						return array();
+					}
 			}
 			
 			
@@ -343,16 +361,16 @@ class Findlocation_Controller extends Controller
 			}
 		}
 			 
-		return $ret_val;      
+		return $ret_val;
 	}//end of get google coordinates
 
 	
 	/**
 	* fetch a URL. Override this method to change the way URLs are fetched.
-	* 
+	*
 	* @param string $url
 	*/
-	private function fetchURL($url) 
+	private function fetchURL($url)
 	{
 
 		return file_get_contents($url);

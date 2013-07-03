@@ -23,6 +23,7 @@ class Findlocation_Install {
 	{
 		// Create the database tables.
 		// Also include table_prefix in name
+		// HT: Added `fuzzy` boolean NOT NULL default \'0\' for fuzzy search
 		$this->db->query('CREATE TABLE IF NOT EXISTS `'.Kohana::config('database.default.table_prefix').'findlocation_settings` (
 				  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
 				  `region_code` varchar(10) DEFAULT NULL,
@@ -32,6 +33,7 @@ class Findlocation_Install {
 				  `n_w_lon` double NOT NULL default \'0\',
 				  `s_e_lat` double NOT NULL default \'0\',
 				  `s_e_lon` double NOT NULL default \'0\',
+				  `fuzzy` boolean NOT NULL default \'0\',
 				  PRIMARY KEY (`id`)
 				) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1');
 				
